@@ -1,4 +1,4 @@
-package User.createUser;
+package test;
 
 import com.google.inject.Guice;
 import dto.OrderDTO;
@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class OrderDTOTest {
+public class OrderTest {
     private OrderDTO orderDTO;
     private Long orderId;
     private static final String PET_STORE_SWAGGER = "https://petstore.swagger.io/v2";
