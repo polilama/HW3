@@ -1,10 +1,15 @@
 package User.createUser;
 
+import com.google.inject.Guice;
 import dto.OrderDTO;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import scoped.OrderModule;
+import service.OrderService;
+
+import javax.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -15,14 +20,15 @@ public class OrderDTOTest {
     private static final String PET_STORE_SWAGGER = "https://petstore.swagger.io/v2";
     private static final String STORE_ORDER_ORDER_ID = "store/order/{orderId}";
     private static final String STORE_ORDER = "store/order";
+    @Inject
+    private OrderService orderService;
 
     @BeforeEach
     public void beforeTest() {
-        orderDTO = OrderDTO.builder()
-                .petId(1L)
-                .quantity(0)
-                .complete(true)
-                .build();
+        var injector = Guice.createInjector(new OrderModule());
+        injector.injectMembers(this);
+
+        orderDTO = orderService.createOrderDTO(1L, 0, true);
 
         var response = createOrder(orderDTO);
         response.statusCode(200);
