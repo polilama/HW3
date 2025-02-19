@@ -66,6 +66,24 @@ public class OrderTest {
                 .quantity(1000)
                 .complete(true)
                 .build();
+// Создаем новый заказ
+        ValidatableResponse createResponse = orderService.createOrder(newOrder);
+        createResponse.statusCode(200);
+
+        // Получаем ID созданного заказа
+        Long createdOrderId = createResponse.extract().path("id");
+        newOrder.setOrderId(createdOrderId); // Устанавливаем ID в объект заказа
+
+        // Получаем созданный заказ по ID
+        ValidatableResponse getResponse = orderService.createOrderFind(newOrder);
+        getResponse.statusCode(200);
+
+        // Проверяем, что данные совпадают
+        getResponse.body("petId", equalTo(newOrder.getPetId()))
+                .body("quantity", equalTo(newOrder.getQuantity()))
+                .body("complete", equalTo(newOrder.getComplete()));
+
+
 
         orderService.createOrder(newOrder)
                 .statusCode(200)
@@ -82,14 +100,27 @@ public class OrderTest {
                 .complete(true)
                 .build();
 
-        var response = orderService.createOrder(orderToCreate);
-        response.statusCode(200);
+// Создаем заказ
+        var createResponse = orderService.createOrder(orderToCreate);
+        createResponse.statusCode(200);
 
-        Long createdOrderId = response.extract().path("id");
+        Long createdOrderId = createResponse.extract().path("id");
         orderToCreate.setOrderId(createdOrderId);
 
+        // Проверяем, что заказ существует
+        ValidatableResponse getResponse = orderService.createOrderFind(orderToCreate);
+        getResponse.statusCode(200);
+
+        // Удаляем заказ
         orderService.deleteOrder(orderToCreate)
                 .statusCode(200);
+
+        // Проверяем, что заказ больше не существует
+        orderService.createOrderFind(orderToCreate)
+                .statusCode(404)
+                .body("code", equalTo(1))
+                .body("type", equalTo("error"))
+                .body("message", equalTo("Order not found"));
     }
 
     @Test
@@ -101,6 +132,7 @@ public class OrderTest {
                 .body("code", equalTo(1))
                 .body("type", equalTo("error"))
                 .body("message", equalTo("Order not found"));
+
     }
 }
 
